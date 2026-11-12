@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Family Tasks">
+<meta name="theme-color" content="#F2B705">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✏️</text></svg>">
+<title>Family Tasks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EDF4; --surface:#FFFFFF; --surface-2:#F2F5FA; --ink:#1B2540; --ink-2:#5A647D; --line:#D6DDE9;
+  --accent:#2F5BEA; --pencil:#F2B705; --danger:#C93C3C; --ok:#178A5C; --onpencil:#1B2540;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141D; --surface:#171F2C; --surface-2:#1F2938; --ink:#E6EBF4; --ink-2:#9BA6BD; --line:#2B3649;
+    --accent:#8AA6FF; --pencil:#F5C542; --danger:#FF7B7B; --ok:#4FCB98; --onpencil:#1B2540;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141D; --surface:#171F2C; --surface-2:#1F2938; --ink:#E6EBF4; --ink-2:#9BA6BD; --line:#2B3649;
+  --accent:#8AA6FF; --pencil:#F5C542; --danger:#FF7B7B; --ok:#4FCB98; --onpencil:#1B2540;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:'Lexend',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.45;font-weight:400}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);height:100%}
+.app.has-detail{grid-template-columns:268px minmax(0,1fr) 360px}
+
+/* Sidebar */
+.side{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow-y:auto;padding:18px 10px 16px}
+.brand{display:flex;gap:10px;align-items:center;padding:2px 12px 18px;font-weight:600;font-size:16px}
+.mark{width:32px;height:32px;border-radius:9px;background:var(--pencil);color:var(--onpencil);display:grid;place-items:center;font-size:17px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:8px;cursor:pointer}
+.nav button:hover{background:var(--surface-2)}
+.nav button:focus-visible{outline:2px solid var(--accent)}
+.nav button[aria-current="true"]{background:var(--surface-2);font-weight:600;box-shadow:inset 3px 0 0 var(--cur,var(--accent))}
+.nav .ic{width:20px;text-align:center}
+.nav .count{margin-left:auto;font-size:12px;color:var(--ink-2);font-weight:400}
+.nav .count.hot{color:var(--danger);font-weight:600}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;margin:0 4px}
+.side h3{font-size:13px;font-weight:500;color:var(--ink-2);margin:20px 12px 6px}
+.ghost{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--accent);font-weight:500}
+.ghost:hover{background:var(--surface-2)}
+.ghost:focus-visible{outline:2px solid var(--accent)}
+.side .foot{margin-top:auto;padding:16px 12px 0;font-size:12px;color:var(--ink-2)}
+
+/* Main */
+main{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.head{padding:30px 36px 14px;display:flex;align-items:flex-start;gap:14px}
+.menu{display:none;all:unset;cursor:pointer;width:38px;height:38px;border-radius:9px;text-align:center;line-height:38px;font-size:20px;flex:none}
+.menu:focus-visible{outline:2px solid var(--accent)}
+.title{font-size:clamp(28px,4.2vw,42px);font-weight:700;line-height:1.08;margin:0;letter-spacing:-.015em}
+.title span{background:linear-gradient(transparent 60%, var(--hl) 60%, var(--hl) 94%, transparent 94%);padding:0 4px;margin-left:-4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sub{color:var(--ink-2);margin-top:6px;font-size:14px}
+.head .tools{margin-left:auto;display:flex;gap:6px}
+.iconbtn{all:unset;box-sizing:border-box;cursor:pointer;border-radius:8px;padding:6px 10px;color:var(--ink-2);font-size:13px;border:1px solid var(--line);background:var(--surface)}
+.iconbtn:hover{color:var(--ink)}
+.iconbtn:focus-visible{outline:2px solid var(--accent)}
+.scroll{flex:1;overflow-y:auto;padding:4px 36px 24px}
+.group{font-size:13px;font-weight:600;color:var(--ink-2);margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.group.over{color:var(--danger)}
+.group button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px}
+.group button:focus-visible{outline:2px solid var(--accent)}
+.chev{display:inline-block;transition:transform .15s}
+.chev.open{transform:rotate(90deg)}
+
+.task{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--kc,var(--line));border-radius:10px;padding:11px 12px 11px 12px;margin-bottom:6px;cursor:pointer}
+.task:hover{background:var(--surface-2)}
+.task.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.task.done .ttl{text-decoration:line-through;color:var(--ink-2)}
+.check{all:unset;box-sizing:border-box;flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--ink-2);display:grid;place-items:center;cursor:pointer;color:transparent;font-size:12px;font-weight:700}
+.check:hover{border-color:var(--ok);color:var(--ok)}
+.check:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.check.pop{animation:pop .28s ease-out}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.tbody{flex:1;min-width:0}
+.ttl{overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.meta .late{color:var(--danger);font-weight:600}
+.meta .soon{color:var(--accent);font-weight:500}
+.kidtag{display:inline-flex;align-items:center;gap:5px}
+.kidtag i{width:8px;height:8px;border-radius:50%;background:var(--kc)}
+.star{all:unset;cursor:pointer;font-size:19px;color:var(--ink-2);padding:2px 4px;line-height:1;flex:none}
+.star.on{color:var(--pencil)}
+.star:focus-visible{outline:2px solid var(--accent);border-radius:6px}
+
+.empty{text-align:center;color:var(--ink-2);padding:56px 16px;max-width:420px;margin:0 auto}
+.empty .big{font-size:40px;margin-bottom:8px}
+.empty p{margin:6px 0 16px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;background:var(--accent);color:var(--surface);padding:10px 16px;border-radius:9px;font-weight:600;display:inline-block}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.warn{background:transparent;color:var(--danger);border:1px solid var(--line)}
+
+/* Add bar */
+.addbar{padding:12px 36px 18px;background:var(--bg)}
+.addbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.addrow{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.addrow .plus{color:var(--accent);font-size:20px;width:22px;text-align:center}
+.addrow input{flex:1;border:0;background:transparent;outline:none;font-size:15px;padding:4px 0;min-width:0}
+.addopts{display:flex;flex-wrap:wrap;gap:8px;padding:8px 14px 10px;border-top:1px solid var(--line);background:var(--surface-2);align-items:center}
+.addopts select,.addopts input[type=date]{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px;font-size:13px}
+.addopts .quick{all:unset;cursor:pointer;font-size:13px;padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.addopts .quick[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.addopts .quick:focus-visible{outline:2px solid var(--accent)}
+.addopts .go{margin-left:auto;padding:6px 14px;font-size:13px}
+
+/* Detail */
+.detail{background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;height:100%;overflow:hidden}
+.dscroll{flex:1;overflow-y:auto;padding:22px 20px}
+.dtitle{display:flex;gap:12px;align-items:flex-start}
+.dtitle .check{margin-top:6px}
+.dtitle textarea{flex:1;border:0;background:transparent;resize:none;font-size:20px;font-weight:600;line-height:1.3;outline:none;padding:2px 0;min-height:30px}
+.dtitle textarea:focus-visible{box-shadow:0 2px 0 var(--accent)}
+.steps{margin:14px 0 4px 2px}
+.step{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.step .check{width:18px;height:18px;font-size:10px}
+.step input[type=text]{flex:1;border:0;background:transparent;outline:none;min-width:0}
+.step.done input{text-decoration:line-through;color:var(--ink-2)}
+.x{all:unset;cursor:pointer;color:var(--ink-2);padding:2px 6px;border-radius:6px}
+.x:hover{color:var(--danger)}
+.x:focus-visible{outline:2px solid var(--accent)}
+.addstep{display:flex;gap:10px;align-items:center;padding:8px 0;color:var(--accent)}
+.addstep input{flex:1;border:0;background:transparent;outline:none}
+.card{border:1px solid var(--line);border-radius:10px;margin-top:14px;overflow:hidden}
+.field{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+.field label{width:78px;color:var(--ink-2);font-size:13px;flex:none}
+.field select,.field input{flex:1;border:0;background:transparent;outline:none;min-width:0}
+.field input[type=date]{color:var(--ink)}
+.toggle{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 14px;width:100%;border-bottom:1px solid var(--line)}
+.toggle:last-child{border-bottom:0}
+.toggle:hover{background:var(--surface-2)}
+.toggle:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.toggle.on{color:var(--accent);font-weight:600}
+.notes{width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:12px;resize:vertical;margin-top:14px;outline:none}
+.notes:focus-visible{border-color:var(--accent)}
+.dfoot{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.dfoot .grow{flex:1}
+
+/* Dialog */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:22px;width:min(380px,92vw)}
+dialog::backdrop{background:rgba(10,15,25,.45)}
+dialog h2{margin:0 0 14px;font-size:19px}
+dialog label{display:block;font-size:13px;color:var(--ink-2);margin:10px 0 6px}
+dialog input[type=text]{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--surface-2);outline:none}
+dialog input[type=text]:focus-visible{border-color:var(--accent)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;box-sizing:border-box}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.drow{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.drow .left{margin-right:auto}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;display:flex;gap:12px;align-items:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast button{all:unset;cursor:pointer;color:var(--pencil);font-weight:600}
+.scrim{display:none}
+.backbtn{display:none}
+
+.events{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:8px 0 18px}
+.evcard{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.evcard:hover{border-color:var(--ink-2)}
+.evcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.evtop{display:flex;gap:12px;align-items:center}
+.evemoji{font-size:30px;line-height:1}
+.evname{font-weight:600;font-size:16px;line-height:1.25}
+.evwhen{font-size:13px;color:var(--ink-2)}
+.evwhen b{color:var(--accent);font-weight:600}
+.newev{border-style:dashed;align-items:center;justify-content:center;color:var(--accent);font-weight:600;min-height:118px}
+.bar{height:10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .35s ease}
+.evstat{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.evstat .late{color:var(--danger);font-weight:600}
+.evstat .ready{color:var(--ok);font-weight:600}
+.evprog{padding:0 36px 8px;max-width:600px}
+.evprog .bar{height:12px;margin-bottom:6px}
+.nav button.subitem{padding-left:44px;font-size:14px}
+.types{display:flex;flex-wrap:wrap;gap:6px}
+.type{all:unset;cursor:pointer;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+.type[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.type:focus-visible{outline:2px solid var(--accent)}
+dialog input[type=date]{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:var(--surface-2);color:var(--ink)}
+.chk{display:flex!important;gap:10px;align-items:flex-start;color:var(--ink)!important;font-size:14px!important;margin-top:16px!important}
+.chk small{display:block;color:var(--ink-2);font-size:12.5px;margin-top:2px}
+
+.who{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1}
+.pchip{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-size:13px}
+.pchip i{width:8px;height:8px;border-radius:50%;background:var(--kc)}
+.pchip[aria-pressed="true"]{background:color-mix(in srgb,var(--kc) 20%,var(--surface));border-color:var(--kc);font-weight:600}
+.pchip:focus-visible{outline:2px solid var(--accent)}
+.pchip[disabled]{cursor:default}
+.muted{color:var(--ink-2);font-size:13px}
+.field .who{padding:2px 0}
+@media (max-width: 1100px){
+  .app.has-detail{grid-template-columns:240px minmax(0,1fr) 330px}
+}
+@media (max-width: 860px){
+  .app,.app.has-detail{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;top:0;bottom:0;left:0;width:min(300px,84vw);z-index:40;transform:translateX(-102%);transition:transform .2s;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  .side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.25)}
+  .scrim.show{display:block;position:fixed;inset:0;background:rgba(10,15,25,.4);z-index:35}
+  .menu{display:block}
+  .head{padding:18px 16px 10px}
+  .scroll{padding:4px 14px 20px}
+  .addbar{padding:10px 14px 14px}
+  .evprog{padding:0 16px 8px}
+  .detail{position:fixed;inset:0;z-index:50;border-left:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .backbtn{display:inline-flex}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" id="side" aria-label="Lists"></aside>
+  <div class="scrim" id="scrim"></div>
+  <main id="main"></main>
+  <aside class="detail" id="detail" hidden aria-label="Task details"></aside>
+</div>
+
+<dialog id="kidDlg">
+  <h2 id="kidDlgTitle">Add family member</h2>
+  <label for="kidName">Name</label>
+  <input type="text" id="kidName" maxlength="40" placeholder="e.g. Sofía" autocomplete="off">
+  <label>Color</label>
+  <div class="swatches" id="swatches"></div>
+  <div class="drow">
+    <button class="btn warn left" id="kidDelete" hidden>Remove</button>
+    <button class="btn alt" id="kidCancel">Cancel</button>
+    <button class="btn" id="kidSave">Save</button>
+  </div>
+</dialog>
+
+<dialog id="evDlg">
+  <h2 id="evDlgTitle">New event</h2>
+  <label for="evName">What’s the event?</label>
+  <input type="text" id="evName" maxlength="60" placeholder="e.g. Abuela’s birthday" autocomplete="off">
+  <label for="evDate">Date</label>
+  <input type="date" id="evDate">
+  <label>Type</label>
+  <div class="types" id="evTypes"></div>
+  <label class="chk" id="evStarterRow"><input type="checkbox" id="evStarter" checked><span>Add a starter checklist<small id="evStarterList"></small></span></label>
+  <div class="drow">
+    <button class="btn warn left" id="evDelete" hidden>Delete</button>
+    <button class="btn alt" id="evCancel">Cancel</button>
+    <button class="btn" id="evSave">Save</button>
+  </div>
+</dialog>
+
+<dialog id="codeDlg">
+  <h2>Enter your family code</h2>
+  <p class="muted" style="margin:0 0 6px">Everyone in the family types the same code once on each device. It keeps your list private, so pick a phrase only your family knows.</p>
+  <label for="famCode">Family code</label>
+  <input type="text" id="famCode" autocomplete="off" autocapitalize="none" placeholder="e.g. mango pineapple 2026">
+  <p class="muted" id="famHint" style="margin:8px 0 0"></p>
+  <div class="drow"><button class="btn" id="famGo">Open family list</button></div>
+</dialog>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastAct" hidden></button></div>
+
+<script>
+const CATEGORIES=[
+  {name:'Household Errands',ic:'🧺',color:'#17A398'},
+  {name:'School',ic:'🎒',color:'#3B6FF0'},
+  {name:'Meal Prep + Kitchen',ic:'🍳',color:'#E4572E'},
+  {name:'Upcoming Events',ic:'🎉',color:'#9B5DE5'},
+  {name:'Other',ic:'📌',color:'#7A8599'}
+];
+const catOf=n=>CATEGORIES.find(c=>c.name===n);
+const catIc=n=>(catOf(n)||{ic:'🏷️'}).ic;
+const EVENT_TYPES=[
+  {id:'birthday',name:'Birthday',emoji:'🎂',starter:['Pick and buy a gift','Wrap the gift','Order or bake the cake','Send invitations','Buy decorations','Plan the menu','Get candles and party supplies']},
+  {id:'party',name:'Party',emoji:'🎉',starter:['Make the guest list','Send invitations','Plan the menu','Shop for food and drinks','Buy decorations','Set up the space']},
+  {id:'trip',name:'Trip',emoji:'✈️',starter:['Book transportation','Book a place to stay','Make a packing list','Pack bags','Arrange pet or house care']},
+  {id:'holiday',name:'Holiday',emoji:'🎄',starter:['Plan the menu','Shop for groceries','Buy and wrap gifts','Decorate the house']},
+  {id:'school',name:'School event',emoji:'🏫',starter:['Check what to bring','Prepare outfit or uniform','Arrange a ride']},
+  {id:'other',name:'Other',emoji:'📅',starter:[]}
+];
+const getEvent=id=>S.events.find(e=>e.id===id);
+const fmtLong=s=>parse(s).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+const fmtShort=s=>parse(s).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+function countdown(s){const n=dayDiff(s);if(n===0)return'Today';if(n===1)return'Tomorrow';if(n>1)return`In ${n} days`;if(n===-1)return'Yesterday';return`${-n} days ago`}
+function progress(id){const ts=S.tasks.filter(t=>t.event===id);const done=ts.filter(t=>t.done).length;
+  return{total:ts.length,done,pct:ts.length?Math.round(done/ts.length*100):0,late:ts.filter(overdue).length}}
+const COLORS=['#3B6FF0','#E4572E','#17A398','#9B5DE5','#E0A100','#E5487A','#2E86AB','#5E9940'];
+const SMART=[
+  {id:'myday',name:'My Day',ic:'☀️'},
+  {id:'important',name:'Important',ic:'⭐'},
+  {id:'planned',name:'Planned',ic:'📅'},
+  {id:'all',name:'All tasks',ic:'📚'},
+  {id:'completed',name:'Completed',ic:'✅'}
+];
+const LS='family-assignments-v1', LSUI='family-assignments-ui';
+const S={kids:[],tasks:[],events:[],pastOpen:false,view:'myday',sel:null,doneOpen:false,mode:'local',loading:false,readOnly:false,
+  draft:{subject:'',due:'',kids:[]}};
+let db=null;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>ymd(new Date());
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
+const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const dayDiff=s=>Math.round((parse(s)-parse(today()))/864e5);
+function dueLabel(s){
+  if(!s)return'';const n=dayDiff(s);
+  if(n===0)return'Due today';if(n===1)return'Due tomorrow';if(n===-1)return'Due yesterday';
+  const d=parse(s);
+  if(n>1&&n<7)return'Due '+d.toLocaleDateString(undefined,{weekday:'long'});
+  return'Due '+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+}
+const overdue=t=>t.due&&!t.done&&t.due<today();
+const inMyDay=t=>t.myDay===today()||(!t.done&&t.due&&t.due<=today());
+const kidIds=t=>Array.isArray(t.kids)?t.kids:(t.kid?[t.kid]:[]);
+const kidsOf=t=>kidIds(t).map(id=>S.kids.find(k=>k.id===id)).filter(Boolean);
+const namesOf=t=>{const n=kidsOf(t).map(k=>k.name);return n.length<3?n.join(' & '):n.slice(0,-1).join(', ')+' & '+n[n.length-1]};
+function setKids(t,ids){t.kids=ids;delete t.kid;return t}
+function chips(selected,act,fixed){
+  if(!S.kids.length)return'<span class="muted">Add family members to assign tasks</span>';
+  return S.kids.map(k=>{const on=selected.includes(k.id);
+    return`<button class="pchip" data-act="${act}" data-id="${k.id}" style="--kc:${esc(k.color)}" aria-pressed="${on}" ${fixed===k.id||S.readOnly?'disabled':''}><i></i>${esc(k.name)}</button>`}).join('');
+}
+const getTask=id=>S.tasks.find(t=>t.id===id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ---------- storage ---------- */
+function loadLocal(){
+  try{const r=localStorage.getItem(LS);if(r){const o=JSON.parse(r);S.kids=o.kids||[];S.tasks=o.tasks||[];S.events=o.events||[]}}catch(e){}
+  try{const u=JSON.parse(localStorage.getItem(LSUI)||'{}');if(u.view)S.view=u.view}catch(e){}
+}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({kids:S.kids,tasks:S.tasks,events:S.events}))}catch(e){}}
+function saveUI(){try{localStorage.setItem(LSUI,JSON.stringify({view:S.view}))}catch(e){}}
+function writeErr(e){
+  if(e&&e.code==='permission-denied'){toast('The database refused the change. Check the Firestore rules.');return}
+  if(e&&(e.code==='invalid_argument'||e.code==='not_granted')){S.readOnly=true;render();toast('You can view these tasks but not change them.');}
+  else if(e&&e.code==='quota_exceeded'){toast('The list is full. Delete some completed tasks, then try again.');}
+  else toast('That change didn’t save. Check your connection and try again.');
+}
+function persist(col,obj){
+  if(S.mode==='db'){db.collection(col).doc(obj.id).set(clone(obj)).catch(writeErr)}else saveLocal();
+}
+function unpersist(col,id){
+  if(S.mode==='db'){db.collection(col).doc(id).delete().catch(writeErr)}else saveLocal();
+}
+function putTask(t){
+  if(S.readOnly)return;
+  t.updated=Date.now();
+  const i=S.tasks.findIndex(x=>x.id===t.id);if(i<0)S.tasks.push(t);else S.tasks[i]=t;
+  persist('tasks',t);render();
+}
+function delTask(id){
+  if(S.readOnly)return;
+  const t=getTask(id);if(!t)return;
+  S.tasks=S.tasks.filter(x=>x.id!==id);if(S.sel===id)S.sel=null;
+  unpersist('tasks',id);render();
+  toast('Task deleted.','Undo',()=>putTask(t));
+}
+function putKid(k){
+  if(S.readOnly)return;
+  const i=S.kids.findIndex(x=>x.id===k.id);if(i<0)S.kids.push(k);else S.kids[i]=k;
+  persist('kids',k);render();
+}
+function delKid(id){
+  if(S.readOnly)return;
+  const theirs=S.tasks.filter(t=>kidIds(t).includes(id));
+  S.kids=S.kids.filter(k=>k.id!==id);
+  theirs.forEach(t=>{
+    const rest=kidIds(t).filter(x=>x!==id);
+    if(rest.length){putTask(setKids(clone(t),rest))}
+    else{S.tasks=S.tasks.filter(x=>x.id!==t.id);if(S.mode==='db')db.collection('tasks').doc(t.id).delete().catch(writeErr)}
+  });
+  if(S.view==='kid:'+id)S.view='all';
+  unpersist('kids',id);render();
+}
+
+function putEvent(e){
+  if(S.readOnly)return;
+  const i=S.events.findIndex(x=>x.id===e.id);if(i<0)S.events.push(e);else S.events[i]=e;
+  persist('events',e);render();
+}
+function delEvent(id){
+  if(S.readOnly)return;
+  const theirs=S.tasks.filter(t=>t.event===id);
+  S.events=S.events.filter(e=>e.id!==id);
+  theirs.forEach(t=>{S.tasks=S.tasks.filter(x=>x.id!==t.id);if(S.mode==='db')db.collection('tasks').doc(t.id).delete().catch(writeErr)});
+  if(S.view==='event:'+id)S.view='cat:Upcoming Events';
+  if(S.sel&&!getTask(S.sel))S.sel=null;
+  unpersist('events',id);render();
+}
+
+/* ============ FIREBASE SETUP ============
+   Paste the config object from Firebase (Project settings > Your apps > Web app) below,
+   replacing the PASTE_HERE values. These values are not secret; your family code is. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDFnQ3soT_uop2WrsLgokkmc4OZkxo50Z4",
+  authDomain: "pf-familytask-tracker.firebaseapp.com",
+  projectId: "pf-familytask-tracker",
+  storageBucket: "pf-familytask-tracker.firebasestorage.app",
+  messagingSenderId: "798134486602",
+  appId: "1:798134486602:web:fe9c724d020260c33188b3"
+};
+/* ======================================== */
+const LSFAM='family-tasks-family';
+const configured=()=>FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.apiKey!=='PASTE_HERE';
+async function hashCode(code){
+  const norm=code.trim().toLowerCase().replace(/\s+/g,' ');
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('family-tasks:'+norm));
+  return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,40);
+}
+function makeDb(F,fs,fam){
+  return{collection:c=>({
+    doc:id=>({set:d=>F.setDoc(F.doc(fs,'families',fam,c,id),d),delete:()=>F.deleteDoc(F.doc(fs,'families',fam,c,id))}),
+    onSnapshot:(next,err)=>F.onSnapshot(F.collection(fs,'families',fam,c),snap=>next({docs:snap.docs.map(x=>({id:x.id,data:()=>x.data()}))}),err)
+  })};
+}
+async function initRuntime(){
+  if(!configured()){S.loading=false;render();return}
+  const fam=localStorage.getItem(LSFAM);
+  if(!fam){S.loading=false;render();openCode();return}
+  S.loading=true;render();
+  try{
+    const base='https://www.gstatic.com/firebasejs/10.12.2/';
+    const[A,F,Au]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-firestore.js'),import(base+'firebase-auth.js')]);
+    const app=A.initializeApp(FIREBASE_CONFIG);
+    await Au.signInAnonymously(Au.getAuth(app));
+    let fs;try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache()})}catch(e){fs=F.getFirestore(app)}
+    db=makeDb(F,fs,fam);
+  }catch(e){console.error(e);S.loading=false;render();toast('Couldn’t connect to the family database. Check the Firebase setup, then reload.');return}
+  S.mode='db';S.kids=[];S.tasks=[];S.events=[];
+  let gotK=false,gotT=false,gotE=false;
+  const timer=setTimeout(()=>{if(!gotK||!gotT||!gotE){S.loading=false;render();toast('Still connecting. Your tasks will appear when the connection is back.')}},10000);
+  const done=()=>{if(gotK&&gotT&&gotE){clearTimeout(timer);S.loading=false}render()};
+  const subErr=e=>{clearTimeout(timer);S.loading=false;render();console.error(e);
+    toast(e&&e.code==='permission-denied'?'The database refused access. Check the Firestore rules, then reload.':'Couldn’t load the family list. Reload the page to try again.')};
+  db.collection('kids').onSnapshot(s=>{gotK=true;S.kids=s.docs.map(x=>({...clone(x.data()),id:x.id}));done()},subErr);
+  db.collection('events').onSnapshot(s=>{gotE=true;S.events=s.docs.map(x=>({...clone(x.data()),id:x.id}));done()},subErr);
+  db.collection('tasks').onSnapshot(s=>{gotT=true;S.tasks=s.docs.map(x=>({...clone(x.data()),id:x.id}));
+    if(S.sel&&!getTask(S.sel))S.sel=null;done()},subErr);
+}
+function openCode(){const d=$('#codeDlg');if(!d.open)d.showModal();$('#famCode').focus()}
+async function submitCode(){
+  const v=$('#famCode').value;if(v.trim().length<8){$('#famHint').textContent='Use at least 8 characters, like a short phrase.';$('#famCode').focus();return}
+  localStorage.setItem(LSFAM,await hashCode(v));location.reload();
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify({kids:S.kids,events:S.events,tasks:S.tasks},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='family-tasks-backup.json';a.click();
+}
+async function importData(file){
+  try{const o=JSON.parse(await file.text());
+    (o.kids||[]).forEach(k=>putKid(k));(o.events||[]).forEach(e=>putEvent(e));(o.tasks||[]).forEach(t=>putTask(t));
+    toast(`Imported ${(o.kids||[]).length} people, ${(o.events||[]).length} events and ${(o.tasks||[]).length} tasks.`)}
+  catch(e){toast('That file couldn’t be read. Choose a family-tasks .json file.')}
+}
+
+/* ---------- views ---------- */
+function viewInfo(v=S.view){
+  if(v.startsWith('kid:')){const k=S.kids.find(x=>x.id===v.slice(4));
+    return k?{name:k.name,color:k.color,kid:k,filter:t=>kidIds(t).includes(k.id)}:null}
+  if(v.startsWith('event:')){const e=getEvent(v.slice(6));
+    return e?{name:`${e.emoji} ${e.name}`,color:'#9B5DE5',ev:e,filter:t=>t.event===e.id}:null}
+  if(v.startsWith('cat:')){const c=catOf(v.slice(4));
+    return c?{name:c.name,color:c.color,cat:c,filter:t=>t.subject===c.name}:null}
+  const m=SMART.find(x=>x.id===v);if(!m)return null;
+  const f={myday:inMyDay,important:t=>!!t.important,planned:t=>!!t.due,all:()=>true,completed:t=>t.done}[v];
+  return{name:m.name,color:v==='myday'?'#F2B705':v==='important'?'#F2B705':'#3B6FF0',filter:f,smart:v};
+}
+function sortTasks(a){
+  return a.slice().sort((x,y)=>{
+    if(!!x.done!==!!y.done)return x.done?1:-1;
+    if(x.done)return(y.doneAt||0)-(x.doneAt||0);
+    if(x.due&&y.due&&x.due!==y.due)return x.due<y.due?-1:1;
+    if(!!x.due!==!!y.due)return x.due?-1:1;
+    return(x.created||0)-(y.created||0);
+  });
+}
+function countFor(v){const vi=viewInfo(v);if(!vi)return 0;
+  return v==='completed'?S.tasks.filter(t=>t.done).length:S.tasks.filter(t=>!t.done&&vi.filter(t)).length}
+
+/* ---------- render ---------- */
+function render(){
+  if(!viewInfo())S.view=S.view.startsWith('event:')?'cat:Upcoming Events':'all';
+  renderSide();renderMain();renderDetail();
+  $('#app').classList.toggle('has-detail',!!S.sel);
+}
+function renderSide(){
+  const lateN=S.tasks.filter(overdue).length;
+  let h=`<div class="brand"><span class="mark" aria-hidden="true">✏️</span>Family Tasks</div><nav class="nav">`;
+  for(const m of SMART){
+    const n=countFor(m.id);
+    const hot=m.id==='myday'&&lateN>0;
+    h+=`<button data-view="${m.id}" aria-current="${S.view===m.id}"><span class="ic" aria-hidden="true">${m.ic}</span>${m.name}<span class="count${hot?' hot':''}">${n||''}</span></button>`;
+  }
+  h+=`</nav><h3>Categories</h3><nav class="nav">`;
+  for(const c of CATEGORIES){
+    const v='cat:'+c.name;const n=countFor(v);
+    h+=`<button data-view="${esc(v)}" aria-current="${S.view===v}" style="--cur:${c.color}"><span class="ic" aria-hidden="true">${c.ic}</span>${esc(c.name)}<span class="count">${n||''}</span></button>`;
+    if(c.name==='Upcoming Events'){
+      for(const e of upcomingEvents()){const p=progress(e.id);
+        h+=`<button class="subitem" data-view="event:${e.id}" aria-current="${S.view==='event:'+e.id}" style="--cur:#9B5DE5"><span class="ic" aria-hidden="true">${esc(e.emoji)}</span>${esc(e.name)}<span class="count">${p.total?p.done+'/'+p.total:''}</span></button>`}
+    }
+  }
+  h+=`</nav><h3>Family</h3><nav class="nav">`;
+  for(const k of S.kids){
+    const n=countFor('kid:'+k.id);
+    h+=`<button data-view="kid:${k.id}" aria-current="${S.view==='kid:'+k.id}" style="--cur:${esc(k.color)}"><span class="dot" style="background:${esc(k.color)}"></span>${esc(k.name)}<span class="count">${n||''}</span></button>`;
+  }
+  h+=`</nav>`;
+  if(!S.readOnly)h+=`<button class="ghost" data-act="addkid"><span aria-hidden="true">＋</span>Add family member</button>`;
+  h+=`<div class="foot">${S.mode==='db'?'Synced with your family.':configured()?'Not connected yet.':'Saved in this browser only. Add your Firebase setup to share it.'}
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"><button class="iconbtn" data-act="export">Back up</button><button class="iconbtn" data-act="import">Import</button>${configured()?'<button class="iconbtn" data-act="famcode">Family code</button>':''}</div></div>`;
+  $('#side').innerHTML=h;
+}
+function taskRow(t,showKid){
+  const ks=kidsOf(t);const viewing=S.view.startsWith('kid:')?S.view.slice(4):'';
+  const kc=(ks.find(k=>k.id===viewing)||ks[0]||{}).color||'var(--line)';
+  const meta=[];
+  const others=ks.filter(k=>k.id!==viewing);
+  if(others.length)meta.push((viewing?'<span>with</span>':'')+others.map(k=>`<span class="kidtag" style="--kc:${esc(k.color)}"><i></i>${esc(k.name)}</span>`).join(''));
+  const ev=t.event&&getEvent(t.event);
+  if(ev&&!S.view.startsWith('event:'))meta.push(`<span>${esc(ev.emoji)} ${esc(ev.name)}</span>`);
+  if(t.subject&&!S.view.startsWith('cat:')&&!ev)meta.push(`<span>${catIc(t.subject)} ${esc(t.subject)}</span>`);
+  if(t.due&&!t.done){const n=dayDiff(t.due);meta.push(`<span class="${n<0?'late':n<=1?'soon':''}">${dueLabel(t.due)}</span>`)}
+  if(t.done&&t.doneAt)meta.push(`<span>Done ${new Date(t.doneAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>`);
+  if(t.steps&&t.steps.length)meta.push(`<span>${t.steps.filter(s=>s.done).length} of ${t.steps.length} steps</span>`);
+  if(t.myDay===today()&&S.view!=='myday')meta.push(`<span>☀️ My Day</span>`);
+  if(t.notes)meta.push(`<span>📝 Note</span>`);
+  return`<div class="task${t.done?' done':''}${S.sel===t.id?' sel':''}" data-task="${t.id}" style="--kc:${esc(kc)}" tabindex="0" role="button" aria-label="Open ${esc(t.title)}">
+    <button class="check${t.done?' on':''}" data-act="toggle" aria-label="${t.done?'Mark not done':'Mark done'}" ${S.readOnly?'disabled':''}>✓</button>
+    <div class="tbody"><div class="ttl">${esc(t.title)}</div>${meta.length?`<div class="meta">${meta.join('')}</div>`:''}</div>
+    <button class="star${t.important?' on':''}" data-act="star" aria-label="${t.important?'Remove importance':'Mark as important'}" ${S.readOnly?'disabled':''}>${t.important?'★':'☆'}</button>
+  </div>`;
+}
+function renderMain(){
+  const vi=viewInfo();const isKid=!!vi.kid;
+  const hl=`color-mix(in srgb, ${vi.color} 42%, transparent)`;
+  let sub='';
+  if(S.view==='myday')sub=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  else if(vi.ev)sub=vi.ev.date?fmtLong(vi.ev.date)+' · '+countdown(vi.ev.date):'No date yet';
+  else if(isKid){const open=S.tasks.filter(t=>kidIds(t).includes(vi.kid.id)&&!t.done);const late=open.filter(overdue).length;
+    sub=`${open.length} to do`+(late?` · ${late} overdue`:'');}
+  let h=`<div class="head"><button class="menu" data-act="menu" aria-label="Show lists">☰</button>
+    <div><h1 class="title" style="--hl:${hl}"><span>${esc(vi.name)}</span></h1>${sub?`<div class="sub">${esc(sub).replace(' · ',' · ')}</div>`:''}</div>
+    ${isKid&&!S.readOnly?`<div class="tools"><button class="iconbtn" data-act="editkid" data-id="${vi.kid.id}">Edit</button></div>`:''}${vi.ev&&!S.readOnly?`<div class="tools"><button class="iconbtn" data-act="editevent" data-id="${vi.ev.id}">Edit event</button></div>`:''}${vi.cat&&vi.cat.name==='Upcoming Events'&&!S.readOnly?`<div class="tools"><button class="btn" data-act="addevent">New event</button></div>`:''}</div>`;
+  if(vi.ev){const p=progress(vi.ev.id);
+    h+=`<div class="evprog"><div class="bar" role="progressbar" aria-label="Event progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.pct}"><i style="width:${p.pct}%"></i></div><div class="evstat"><span>${p.total?`${p.done} of ${p.total} tasks done`:'No tasks yet'}</span>${p.late?`<span class="late">${p.late} overdue</span>`:p.total&&p.done===p.total?'<span class="ready">All set 🎉</span>':`<span>${p.pct}%</span>`}</div></div>`}
+  h+=`<div class="scroll" id="scroll">`;
+  if(S.loading){h+=`<div class="empty"><div class="big">⏳</div><p>Loading the family list…</p></div>`}
+  else if(vi.cat&&vi.cat.name==='Upcoming Events'){h+=eventsOverview()}
+  else if(!S.kids.length&&!S.tasks.length&&!vi.cat&&!vi.ev){
+    h+=`<div class="empty"><div class="big">👨‍👩‍👧‍👦</div><p><strong>Start with your family.</strong><br>Add each family member so their tasks get their own list and color. You can also add tasks for the whole family below.</p>${S.readOnly?'':'<button class="btn" data-act="addkid">Add family member</button>'}</div>`;
+  }else{
+    const list=sortTasks(S.tasks.filter(vi.filter));
+    const open=list.filter(t=>!t.done),done=list.filter(t=>t.done);
+    const showKid=!isKid;
+    if(S.view==='completed'){
+      h+=done.length?done.map(t=>taskRow(t,true)).join(''):emptyMsg();
+    }else if(S.view==='planned'){
+      const groups=[['Overdue',t=>t.due<today(),'over'],['Today',t=>t.due===today()],['Tomorrow',t=>t.due===addDays(1)],
+        ['This week',t=>dayDiff(t.due)>1&&dayDiff(t.due)<7],['Later',t=>dayDiff(t.due)>=7]];
+      let any=false;
+      for(const[g,f,cls]of groups){const items=open.filter(f);if(!items.length)continue;any=true;
+        h+=`<div class="group ${cls||''}">${g} <span>${items.length}</span></div>`+items.map(t=>taskRow(t,showKid)).join('')}
+      if(!any)h+=emptyMsg();
+    }else{
+      if(!open.length&&!done.length)h+=emptyMsg();
+      else if(!open.length)h+=`<div class="empty" style="padding:28px 16px"><div class="big">🎉</div><p>All caught up.</p></div>`;
+      h+=open.map(t=>taskRow(t,showKid)).join('');
+      if(done.length){
+        h+=`<div class="group"><button data-act="donetoggle" aria-expanded="${S.doneOpen}"><span class="chev${S.doneOpen?' open':''}" aria-hidden="true">›</span>Completed ${done.length}</button></div>`;
+        if(S.doneOpen)h+=done.map(t=>taskRow(t,showKid)).join('');
+      }
+    }
+  }
+  h+=`</div>`;
+  if(S.view!=='completed'&&!S.readOnly&&!S.loading)h+=addBar(vi);
+  const sc=$('#scroll');const top=sc?sc.scrollTop:0;
+  const focusAdd=document.activeElement&&document.activeElement.id==='addInput';
+  const addVal=$('#addInput')?$('#addInput').value:'';
+  $('#main').innerHTML=h;
+  if($('#scroll'))$('#scroll').scrollTop=top;
+  if($('#addInput')){$('#addInput').value=addVal;if(focusAdd)$('#addInput').focus()}
+}
+function upcomingEvents(){return S.events.filter(e=>!e.date||dayDiff(e.date)>=0).sort((a,b)=>(a.date||'9')<(b.date||'9')?-1:1)}
+function evCard(e){
+  const p=progress(e.id);
+  return`<button class="evcard" data-view="event:${e.id}"><div class="evtop"><span class="evemoji" aria-hidden="true">${esc(e.emoji)}</span><div><div class="evname">${esc(e.name)}</div><div class="evwhen">${e.date?`${fmtShort(e.date)} · <b>${countdown(e.date)}</b>`:'No date yet'}</div></div></div>
+    <div class="bar" aria-hidden="true"><i style="width:${p.pct}%"></i></div>
+    <div class="evstat"><span>${p.total?`${p.done} of ${p.total} done`:'No tasks yet'}</span>${p.late?`<span class="late">${p.late} overdue</span>`:p.total&&p.done===p.total?'<span class="ready">All set</span>':''}</div></button>`;
+}
+function eventsOverview(){
+  const up=upcomingEvents();
+  const past=S.events.filter(e=>e.date&&dayDiff(e.date)<0).sort((a,b)=>a.date<b.date?1:-1);
+  let h='';
+  if(!up.length&&S.readOnly)h+=`<div class="empty"><div class="big">🎈</div><p>No upcoming events.</p></div>`;
+  else h+=`<div class="events">${up.map(evCard).join('')}${S.readOnly?'':`<button class="evcard newev" data-act="addevent">＋ New event</button>`}</div>`;
+  const open=sortTasks(S.tasks.filter(t=>t.subject==='Upcoming Events'&&!t.event&&!t.done));
+  if(open.length)h+=`<div class="group">Other upcoming tasks <span>${open.length}</span></div>`+open.map(t=>taskRow(t,true)).join('');
+  if(past.length){
+    h+=`<div class="group"><button data-act="pasttoggle" aria-expanded="${S.pastOpen}"><span class="chev${S.pastOpen?' open':''}" aria-hidden="true">›</span>Past events ${past.length}</button></div>`;
+    if(S.pastOpen)h+=`<div class="events">${past.map(evCard).join('')}</div>`;
+  }
+  return h;
+}
+function emptyMsg(){
+  if(S.view.startsWith('event:'))return`<div class="empty"><div class="big">📝</div><p>No tasks yet. Add what needs to happen before the day, and who’s doing it.</p></div>`;
+  const m={myday:'Nothing due today. Tasks due today or overdue show up here, and you can add any task to My Day.',
+    important:'Star a task to keep it here.',planned:'Tasks with a due date show up here, sorted by when they’re due.',
+    completed:'Finished tasks show up here.',all:'No tasks yet. Add the first one below.'}[S.view];
+  return`<div class="empty"><div class="big">📭</div><p>${m||'No tasks yet. Add the first one below.'}</p></div>`;
+}
+function addBar(vi){
+  const d=S.draft;const isKid=!!vi.kid;
+  const picked=isKid?[...new Set([vi.kid.id,...d.kids])]:d.kids;
+  const kidSel=S.kids.length?`<div class="who" role="group" aria-label="Who is it for" style="flex-basis:100%">${chips(picked,'draftkid',isKid?vi.kid.id:'')}${picked.length?'':'<span class="muted">Whole family</span>'}</div>`:'';
+  const quick=[['Today',today()],['Tomorrow',addDays(1)]];
+  return`<div class="addbar"><div class="addbox">
+    <div class="addrow"><span class="plus" aria-hidden="true">＋</span><input id="addInput" placeholder="${isKid?'Add a task for '+esc(vi.kid.name):vi.ev?'Add a task for '+esc(vi.ev.name):vi.cat?'Add a task to '+esc(vi.cat.name):'Add a task'}" aria-label="New task" autocomplete="off" maxlength="200"></div>
+    <div class="addopts">${kidSel}
+      ${vi.cat||vi.ev?'':`<select id="addSubject" aria-label="Category"><option value="">Category</option>${CATEGORIES.map(c=>`<option value="${esc(c.name)}"${d.subject===c.name?' selected':''}>${c.ic} ${esc(c.name)}</option>`).join('')}</select>`}
+      ${quick.map(([l,v])=>`<button class="quick" data-act="quickdue" data-v="${v}" aria-pressed="${d.due===v}">${l}</button>`).join('')}
+      <input type="date" id="addDue" aria-label="Due date" value="${d.due}">
+      <button class="btn go" data-act="add">Add</button>
+    </div></div></div>`;
+}
+function renderDetail(){
+  const el=$('#detail');const t=S.sel&&getTask(S.sel);
+  if(!t){el.hidden=true;el.innerHTML='';return}
+  el.hidden=false;
+  const ro=S.readOnly?'disabled':'';
+  const steps=(t.steps||[]).map((s,i)=>`<div class="step${s.done?' done':''}"><button class="check${s.done?' on':''}" data-act="steptoggle" data-i="${i}" aria-label="${s.done?'Mark step not done':'Mark step done'}" ${ro}>✓</button>
+    <input type="text" value="${esc(s.t)}" data-act="stepedit" data-i="${i}" aria-label="Step" ${ro}><button class="x" data-act="stepdel" data-i="${i}" aria-label="Delete step" ${ro}>✕</button></div>`).join('');
+  const tk=kidIds(t);
+  const extra=t.subject&&!catOf(t.subject)?`<option selected>${esc(t.subject)}</option>`:'';
+  const subjOpts=`<option value="">None</option>`+CATEGORIES.map(c=>`<option value="${esc(c.name)}"${t.subject===c.name?' selected':''}>${c.ic} ${esc(c.name)}</option>`).join('')+extra;
+  const inDay=t.myDay===today();
+  el.innerHTML=`<div class="dscroll">
+    <button class="iconbtn backbtn" data-act="close" style="margin-bottom:14px">‹ Back</button>
+    <div class="dtitle"><button class="check${t.done?' on':''}" data-act="dtoggle" aria-label="${t.done?'Mark not done':'Mark done'}" ${ro}>✓</button>
+      <textarea id="dTitle" rows="2" aria-label="Task title" ${ro}>${esc(t.title)}</textarea>
+      <button class="star${t.important?' on':''}" data-act="dstar" aria-label="${t.important?'Remove importance':'Mark as important'}" ${ro}>${t.important?'★':'☆'}</button></div>
+    <div class="steps">${steps}${S.readOnly?'':`<div class="addstep"><span aria-hidden="true">＋</span><input id="stepInput" placeholder="Add a step" aria-label="Add a step" maxlength="150"></div>`}</div>
+    <div class="card"><button class="toggle${inDay?' on':''}" data-act="myday" ${ro}>☀️ ${inDay?'Added to My Day':'Add to My Day'}</button></div>
+    <div class="card">
+      <div class="field"><label>For</label><div class="who" role="group" aria-label="Who is it for">${chips(tk,'dkid','')}${tk.length?'':'<span class="muted">Whole family</span>'}</div></div>
+      <div class="field"><label for="dSubject">Category</label><select id="dSubject" ${ro}>${subjOpts}</select></div>
+      <div class="field"><label for="dDue">Due</label><input type="date" id="dDue" value="${esc(t.due||'')}" ${ro}></div>
+      <div class="field"><label for="dEvent">Event</label><select id="dEvent" ${ro}><option value="">None</option>${S.events.map(e=>`<option value="${e.id}"${t.event===e.id?' selected':''}>${esc(e.emoji+' '+e.name)}</option>`).join('')}</select></div>
+    </div>
+    <textarea class="notes" id="dNotes" placeholder="Add notes: addresses, shopping list, what to bring…" aria-label="Notes" ${ro}>${esc(t.notes||'')}</textarea>
+  </div>
+  <div class="dfoot"><button class="iconbtn" data-act="close">Close</button><span class="grow" style="text-align:center">Added ${new Date(t.created||Date.now()).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>${S.readOnly?'':'<button class="iconbtn" data-act="delete" style="color:var(--danger)">Delete</button>'}</div>`;
+}
+
+/* ---------- actions ---------- */
+function addTask(){
+  const inp=$('#addInput');const title=(inp&&inp.value||'').trim();
+  if(!title){inp&&inp.focus();return}
+  const vi=viewInfo();
+  const kids=vi.kid?[...new Set([vi.kid.id,...S.draft.kids])]:S.draft.kids.slice();
+  const due=$('#addDue')?$('#addDue').value:'';
+  const t={id:uid(),title,kids,subject:vi.ev?'Upcoming Events':vi.cat?vi.cat.name:($('#addSubject')?$('#addSubject').value:''),event:vi.ev?vi.ev.id:'',due,
+    important:S.view==='important',myDay:S.view==='myday'?today():'',done:false,steps:[],notes:'',created:Date.now()};
+  S.draft={subject:(vi.cat||vi.ev)?S.draft.subject:t.subject,due:'',kids:S.draft.kids};
+  inp.value='';
+  putTask(t);
+  $('#addInput')&&$('#addInput').focus();
+}
+function toggleDone(id,btn){
+  const t=clone(getTask(id));t.done=!t.done;t.doneAt=t.done?Date.now():null;
+  putTask(t);
+  if(t.done){const b=document.querySelector(`[data-task="${id}"] .check`);if(b)b.classList.add('pop');
+    toast(`Nice work${kidsOf(t).length?', '+namesOf(t):''}!`,'Undo',()=>{const u=clone(getTask(id));u.done=false;u.doneAt=null;putTask(u)})}
+}
+function closeSide(){$('#side').classList.remove('open');$('#scrim').classList.remove('show')}
+
+document.addEventListener('click',e=>{
+  const v=e.target.closest('[data-view]');
+  if(v){S.view=v.dataset.view;S.sel=null;saveUI();closeSide();render();$('#scroll')&&($('#scroll').scrollTop=0);return}
+  const a=e.target.closest('[data-act]');const row=e.target.closest('[data-task]');
+  const act=a&&a.dataset.act;
+  if(act==='toggle'&&row){toggleDone(row.dataset.task);return}
+  if(act==='star'&&row){const t=clone(getTask(row.dataset.task));t.important=!t.important;putTask(t);return}
+  if(!act&&row){S.sel=S.sel===row.dataset.task&&window.innerWidth>860?null:row.dataset.task;render();return}
+  const sel=S.sel&&getTask(S.sel);
+  switch(act){
+    case'menu':$('#side').classList.add('open');$('#scrim').classList.add('show');break;
+    case'addkid':closeSide();openKid();break;
+    case'editkid':openKid(a.dataset.id);break;
+    case'addevent':closeSide();openEvent();break;
+    case'editevent':openEvent(a.dataset.id);break;
+    case'draftkid':{const k=a.dataset.id;const ks=S.draft.kids;S.draft.kids=ks.includes(k)?ks.filter(x=>x!==k):[...ks,k];render();break}
+    case'dkid':if(sel){const ids=kidIds(sel);const k=a.dataset.id;putTask(setKids(clone(sel),ids.includes(k)?ids.filter(x=>x!==k):[...ids,k]))}break;
+    case'export':exportData();break;
+    case'import':$('#importFile').click();break;
+    case'famcode':if(confirm('Switch to a different family code? This device will reload and open that family’s list.')){localStorage.removeItem(LSFAM);location.reload()}break;
+    case'pasttoggle':S.pastOpen=!S.pastOpen;render();break;
+    case'donetoggle':S.doneOpen=!S.doneOpen;render();break;
+    case'add':addTask();break;
+    case'quickdue':S.draft.due=S.draft.due===a.dataset.v?'':a.dataset.v;$('#addDue').value=S.draft.due;
+      document.querySelectorAll('.quick').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.draft.due));break;
+    case'close':S.sel=null;render();break;
+    case'delete':if(sel)delTask(sel.id);break;
+    case'dtoggle':if(sel)toggleDone(sel.id);break;
+    case'dstar':if(sel){const t=clone(sel);t.important=!t.important;putTask(t)}break;
+    case'myday':if(sel){const t=clone(sel);t.myDay=t.myDay===today()?'':today();putTask(t)}break;
+    case'steptoggle':if(sel){const t=clone(sel);t.steps[+a.dataset.i].done=!t.steps[+a.dataset.i].done;putTask(t)}break;
+    case'stepdel':if(sel){const t=clone(sel);t.steps.splice(+a.dataset.i,1);putTask(t)}break;
+  }
+});
+$('#scrim').addEventListener('click',closeSide);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='addInput'){e.preventDefault();addTask();return}
+  if(e.key==='Enter'&&e.target.id==='stepInput'){
+    e.preventDefault();const v=e.target.value.trim();const sel=getTask(S.sel);if(!v||!sel)return;
+    const t=clone(sel);t.steps=t.steps||[];t.steps.push({t:v,done:false});putTask(t);$('#stepInput')&&$('#stepInput').focus();return}
+  if(e.key==='Enter'&&e.target.id==='dTitle'){e.preventDefault();e.target.blur();return}
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('.task')){e.preventDefault();S.sel=e.target.dataset.task;render();$('#dTitle')&&$('#dTitle').focus();return}
+  if(e.key==='Escape'){if(S.sel){S.sel=null;render()}closeSide()}
+});
+document.addEventListener('change',e=>{
+  const id=e.target.id;const sel=S.sel&&getTask(S.sel);
+  if(id==='addSubject')S.draft.subject=e.target.value;
+  if(id==='addDue'){S.draft.due=e.target.value;document.querySelectorAll('.quick').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.draft.due))}
+  if(!sel)return;
+  const t=clone(sel);
+  if(id==='dSubject'){t.subject=e.target.value;putTask(t)}
+  if(id==='dDue'){t.due=e.target.value;putTask(t)}
+  if(id==='dEvent'){t.event=e.target.value;if(t.event&&!t.subject)t.subject='Upcoming Events';putTask(t)}
+  if(e.target.dataset.act==='stepedit'){const i=+e.target.dataset.i;const v=e.target.value.trim();if(v){t.steps[i].t=v;putTask(t)}}
+});
+document.addEventListener('focusout',e=>{
+  const sel=S.sel&&getTask(S.sel);if(!sel)return;
+  if(e.target.id==='dTitle'){const v=e.target.value.trim();if(v&&v!==sel.title){const t=clone(sel);t.title=v;putTask(t)}}
+  if(e.target.id==='dNotes'){const v=e.target.value;if(v!==(sel.notes||'')){const t=clone(sel);t.notes=v;putTask(t)}}
+});
+
+/* ---------- family member dialog ---------- */
+let editingKid=null,kidColor=COLORS[0];
+function openKid(id){
+  editingKid=id||null;const k=id&&S.kids.find(x=>x.id===id);
+  $('#kidDlgTitle').textContent=k?'Edit '+k.name:'Add family member';
+  $('#kidName').value=k?k.name:'';
+  kidColor=k?k.color:COLORS[S.kids.length%COLORS.length];
+  $('#kidDelete').hidden=!k;
+  drawSwatches();$('#kidDlg').showModal();$('#kidName').focus();
+}
+function drawSwatches(){
+  $('#swatches').innerHTML=COLORS.map(c=>`<button class="sw" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c===kidColor}"></button>`).join('');
+}
+$('#swatches').addEventListener('click',e=>{const b=e.target.closest('.sw');if(b){e.stopPropagation();kidColor=b.dataset.c;drawSwatches()}});
+$('#kidCancel').addEventListener('click',e=>{e.stopPropagation();$('#kidDlg').close()});
+function saveKid(){
+  const name=$('#kidName').value.trim();if(!name){$('#kidName').focus();return}
+  const k=editingKid?{...clone(S.kids.find(x=>x.id===editingKid)),name,color:kidColor}:{id:uid(),name,color:kidColor,created:Date.now()};
+  $('#kidDlg').close();putKid(k);
+  if(!editingKid){S.view='kid:'+k.id;saveUI();render()}
+}
+$('#kidSave').addEventListener('click',e=>{e.stopPropagation();saveKid()});
+$('#kidName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();saveKid()}});
+$('#kidDelete').addEventListener('click',e=>{
+  e.stopPropagation();const k=S.kids.find(x=>x.id===editingKid);if(!k)return;
+  const n=S.tasks.filter(t=>kidIds(t).length===1&&kidIds(t)[0]===k.id).length;
+  if(confirm(`Remove ${k.name}?${n?` Their ${n} task${n>1?'s':''} that no one else shares will be deleted.`:''} Tasks they share stay with the others. This can’t be undone.`)){$('#kidDlg').close();delKid(k.id)}
+});
+
+/* ---------- event dialog ---------- */
+let editingEv=null,evType='birthday';
+function openEvent(id){
+  editingEv=id||null;const e=id&&getEvent(id);
+  $('#evDlgTitle').textContent=e?'Edit event':'New event';
+  $('#evName').value=e?e.name:'';$('#evDate').value=e?(e.date||''):'';
+  evType=e?(e.type||'other'):'birthday';
+  $('#evDelete').hidden=!e;$('#evStarterRow').hidden=!!e;$('#evStarter').checked=true;
+  drawTypes();$('#evDlg').showModal();$('#evName').focus();
+}
+function drawTypes(){
+  $('#evTypes').innerHTML=EVENT_TYPES.map(t=>`<button class="type" data-t="${t.id}" aria-pressed="${t.id===evType}">${t.emoji} ${t.name}</button>`).join('');
+  const st=EVENT_TYPES.find(t=>t.id===evType).starter;
+  if(!editingEv){$('#evStarterRow').hidden=!st.length;$('#evStarterList').textContent=st.join(', ')}
+}
+$('#evTypes').addEventListener('click',e=>{const b=e.target.closest('.type');if(b){e.stopPropagation();evType=b.dataset.t;drawTypes()}});
+$('#evCancel').addEventListener('click',e=>{e.stopPropagation();$('#evDlg').close()});
+function saveEvent(){
+  const name=$('#evName').value.trim();if(!name){$('#evName').focus();return}
+  const type=EVENT_TYPES.find(t=>t.id===evType);
+  const base=editingEv?clone(getEvent(editingEv)):{id:uid(),created:Date.now()};
+  const ev={...base,name,date:$('#evDate').value,type:type.id,emoji:type.emoji};
+  const starter=!editingEv&&$('#evStarter').checked?type.starter:[];
+  $('#evDlg').close();putEvent(ev);
+  const now=Date.now();
+  starter.forEach((title,i)=>putTask({id:uid(),title,kids:[],subject:'Upcoming Events',event:ev.id,due:'',important:false,myDay:'',done:false,steps:[],notes:'',created:now+i}));
+  if(!editingEv){S.view='event:'+ev.id;S.sel=null;saveUI();render()}
+}
+$('#evSave').addEventListener('click',e=>{e.stopPropagation();saveEvent()});
+$('#evName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();saveEvent()}});
+$('#evDelete').addEventListener('click',e=>{
+  e.stopPropagation();const ev=getEvent(editingEv);if(!ev)return;
+  const n=progress(ev.id).total;
+  if(confirm(`Delete ${ev.name}${n?` and its ${n} task${n>1?'s':''}`:''}? This can’t be undone.`)){$('#evDlg').close();delEvent(ev.id)}
+});
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg,actLabel,fn){
+  $('#toastMsg').textContent=msg;const b=$('#toastAct');
+  if(actLabel){b.hidden=false;b.textContent=actLabel;b.onclick=e=>{e.stopPropagation();fn();$('#toast').classList.remove('show')}}else b.hidden=true;
+  $('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),4500);
+}
+
+$('#famGo').addEventListener('click',e=>{e.stopPropagation();submitCode()});
+$('#famCode').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();submitCode()}});
+$('#codeDlg').addEventListener('cancel',e=>e.preventDefault());
+$('#importFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importData(f);e.target.value=''});
+
+/* ---------- start ---------- */
+loadLocal();render();initRuntime();
+// roll My Day over at midnight
+let lastDay=today();setInterval(()=>{if(today()!==lastDay){lastDay=today();render()}},60000);
+</script>
+</body>
+</html>
